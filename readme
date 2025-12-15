@@ -1,0 +1,79 @@
+# 폴더별 역할 요약
+architectures/  # encoder, decoder, models 코드
+augmentations/  # 데이터 증강 build 코드 (현재 사용 x)
+data/           # BraTS 데이터셋 버전 별 저장
+dataloaders/    # 데이터로더 로더 코드
+evaluate/       # 학습 모델 테스트 데이터 평가 코드
+experiments/    # 모델 weight, 실험 기록 폴더
+losses/         # dice, diceCE 등 Loss 코드
+metrics/        # SlidingWindowInference 클래스 정의 -> 3d seg 평가 metrics
+optimizers/     # optimizer 및 Scheduler 코드
+tools/          # model summary 코드
+train_scripts/  # train pipeline 코드
+xai/            # 추론 결과 XAI(Grad-CAM, Integrated gradients, Occlusion) 코드
+
+
+# 프로젝트 전체 구조 및 용도 정리
+
+├── architectures
+│   ├── __init__.py
+│   ├── build_architecture.py   # 모델을 빌드해주는 코드
+│   ├── decoders    # 디코더
+│   │   ├── __init__.py
+│   │   ├── mlp.py
+│   │   ├── segformer3d_decoder.py  # mlp decoder (segformer baseline)
+│   │   └── unet_decoder_3d.py      # Unet decoder
+│   ├── encoders
+│   │   ├── __init__.py
+│   │   └── attemtion.py
+│   │   └── mlp.py
+│   │   └── patch_embedding.py
+│   │   └── segformer3d_encoder.py  # Segformer encoder
+│   │   └── transformer_blocks.py
+│   ├── models
+│   │   └── segformer3d_unet.py # Segformer decoder(unet)
+│   │   └── segformer3d.py  # Segformer model (baseline)
+│   │   └── unet3d.py  # 3d UNet
+│   ├── readme
+│   └── 
+├── augmentations
+│   ├── __init__.py
+│   └── augmentations.py
+├── dataloaders
+│   ├── __init__.py
+│   ├── brats2017_seg.py
+│   ├── brats2018_seg.py
+│   ├── brats2021_seg.py
+│   ├── brats_merged_seg.py
+│   └── build_dataset.py
+├── evaluate
+│   ├── csv_record.py
+│   ├── evaluate.py
+│   ├── pre.txt
+│   ├── readme
+│   ├── result.csv
+│   └── result.txt
+├── experiments
+│   ├── run_experiment.py   # train model
+│   ├── brats_2018_21/
+│   ├── brats_2018/
+├── losses
+│   ├── __init__.py
+│   └── losses.py       # crossentropy, binarycrossentropy, dice, diceCE, TverskyLoss, dice_focal losses
+├── metrics
+│   └── segmentation_metrics.py  # SlidingWindowInference
+├── optimizers
+│   ├── __init__.py
+│   ├── optimizers.py   # adam, adamw, sgd
+│   └── schedulers.py
+├── readme
+├── requirements.txt
+├── train_scripts
+│   ├── __init__.py
+│   ├── readme
+│   ├── trainer_ddp.py  # Segmentation_Trainer
+│   └── utils.py
+├── vir_env.txt
+
+
+experiments/brats_2018_21/segformer3d_mlp/ex3/config.yaml

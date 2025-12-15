@@ -1,0 +1,28 @@
+Segformer3d.py 구성
+- encoder : encoders/segformer3d_encoder.py
+    - import 코드(encoders 폴더 하위) : attention.py, mlp.py, patch_embedding.py, transformer_blocks.py
+- decoder : decoders/segformer3d_decoder.py
+    - import 코드(decoders 폴더 하위) : mlp.py
+- models : segformer3d.py
+# 폴더 구조
+├── architectures
+│   ├── __init__.py
+│   ├── build_architecture.py   # 모델을 빌드 코드
+│   ├── decoders
+│   │   ├── __init__.py
+│   │   ├── mlp.py
+│   │   ├── segformer3d_decoder.py  # mlp decoder (segformer baseline)
+│   │   └── unet_decoder_3d.py      # Unet decoder
+│   ├── encoders
+│   │   ├── __init__.py
+│   │   └── attemtion.py
+│   │   └── mlp.py
+│   │   └── patch_embedding.py
+│   │   └── segformer3d_encoder.py  # Segformer encoder
+│   │   └── transformer_blocks.py
+│   ├── models
+│   │   └── segformer3d_unet.py # Segformer decoder(unet)
+│   │   └── segformer3d.py  # Segformer model (baseline)
+│   ├── readme
+│   ├── build_architecture.py   # 모델 빌드 코드
+

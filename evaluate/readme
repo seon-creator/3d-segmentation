@@ -1,0 +1,2 @@
+eval.py         # 0,1,2,3  라벨 학습 모델 -> WT, TC, ET 매핑 후 각 dice score 계산
+debug_eval.py   # eval.py + WT, TC, ET 샘플 dice score 세부 출력 코드

@@ -9,30 +9,21 @@ from augmentations.augmentations import build_augmentations
 
 ######################################################################
 def build_dataset(dataset_type: str, dataset_args: Dict):
-    if dataset_type == "brats2021_seg":
-        from .brats2021_seg import Brats2021Task1Dataset
+    """
+    dataset_type 문자열에 따라 올바른 Dataset 클래스를 반환.
+    """
 
-        dataset = Brats2021Task1Dataset(
+    # BraTS 데이터셋
+    if dataset_type == "brats_seg":
+        from .brats import BratsDataset
+        return BratsDataset(
             root_dir=dataset_args["root"],
             is_train=dataset_args["train"],
             transform=build_augmentations(dataset_args["train"]),
-            fold_id=dataset_args["fold_id"],
+            fold_id=dataset_args.get("fold_id", None),
         )
-        return dataset
-    elif dataset_type == "brats2017_seg":
-        from .brats2017_seg import Brats2017Task1Dataset
-
-        dataset = Brats2017Task1Dataset(
-            root_dir=dataset_args["root"],
-            is_train=dataset_args["train"],
-            transform=build_augmentations(dataset_args["train"]),
-            fold_id=dataset_args["fold_id"],
-        )
-        return dataset
     else:
-        raise ValueError(
-            "only brats2021 and brats2017 segmentation is currently supported!"
-        )
+        raise ValueError(f"❌ Unsupported dataset type: {dataset_type}")
 
 
 ######################################################################

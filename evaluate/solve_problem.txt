@@ -1,0 +1,16 @@
+# WT, TC, ET 성능 지표 계산 문제 해결 과정(참고)
+기존 문제점: WT보다 ET성능이 높게 측정됨: 모델 추론과 라벨 매핑의 오류 발생
+원인 확인: 
+from monai.metrics import DiceMetric
+dice_metric = DiceMetric(include_background=False, reduction="none")
+
+# include_background=False 이 부분이 문제의 원인
+'''
+기존 데이터는 라벨 정보를 WT, TC, ET 세 개로 매핑해두었음
+추론 역시 3개의 클래스 에측하도록 함 즉, background는 고려하지 않음.
+하지만 dice metric은 include_background=False로 설정하면, 모델 추론에서 1개를 무시하게됨.
+즉 실제로는 라벨 클래스 1개를 무시한 채로 dice score를 계산하다보니 기존 예측에서 벗어난 결과가 도출됨.
+'''
+
+# 해결방식: include_background를 False -> True로 변경
+dice_metric = DiceMetric(include_background=True, reduction="none")

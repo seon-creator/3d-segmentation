@@ -1,0 +1,16 @@
+# segformer3d 가상환경 설치 명령어 순서대로 입력
+# 고려사항: 세션 버전 Pytorch 2.4.0, python 3.11 인 경우에 맞추어 작성됨
+
+$ conda create -n "segformer3d" python=3.11.7 ipython==8.12.0
+$ conda activate segformer3d
+$ pip install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-url https://download.pytorch.org/whl/cu124
+$ python -m pip install -r requirements.txt
+$ pip install --force-reinstall --no-cache-dir numpy==1.26.4 scikit-learn==1.4.2
+$ pip install --force-reinstall --no-cache-dir pyarrow==13.0.0
+
+# numpy pyarrow 호환문제 해결을 위한 모듈 재설치
+$ pip uninstall -y numpy pyarrow pandas
+$ pip install numpy==1.26.4 pyarrow==13.0.0 pandas==2.2.2 --no-cache-dir --force-reinstall
+
+# 모델 summary (FLOPs, parameter 확인)
+$ pip install torchinfo

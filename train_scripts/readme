@@ -1,0 +1,36 @@
+# 파일 설명
+trainer_ddp_old.py : 기존 Segformer3d에 내장되어있던 코드 (WT, TC, ET 매핑 라벨을 학습하는 코드)
+trainer_ddp.py : WT, TC, ET 매핑에서 0, 1, 2, 3 개별 라벨을 학습하는 코드
+utils.py
+
+
+## 코드 세부정보
+Segmentation_Trainer
+
+BraTS 등 세그멘테이션 모델 학습/검증/EMA/체크포인트 저장 담당.
+
+주요 메서드
+	•	__init__ : Trainer 초기 설정 및 구성요소(모델, 옵티마이저, 스케줄러 등) 등록
+	•	_configure_trainer : config 기반 내부 변수 설정
+	•	_train_step : 한 epoch 동안의 훈련 루프
+	•	_val_step : 한 epoch 동안의 검증 루프 (Dice 계산)
+	•	_calc_dice_metric : Sliding-window inference로 Dice 평가
+	•	_run_train_val : 전체 학습/검증 루프
+	•	_update_scheduler : warmup → training 스케줄 전환
+	•	_save_and_print : 체크포인트 저장 + 로그 출력
+	•	_create_ema_model : EMA 모델 생성
+	•	_val_ema_model : EMA 모델 검증 및 업데이트
+	•	train : 전체 학습 실행 (public 함수)
+
+AutoEncoder_Trainer
+
+3D AE 모델의 재구성 학습 및 SSIM 기반 평가 담당.
+
+주요 메서드
+	•	__init__ : AE Trainer 초기 설정
+	•	_train_step : AE 훈련 루프
+	•	_val_step : AE 검증 + SSIM 계산
+	•	_calc_mean_ssim : 3D SSIM 메트릭 계산
+	•	_run_train_val : 전체 학습 루프
+	•	_save_and_print : 체크포인트 저장 및 로그 출력
+	•	train : 전체 학습 실행
