@@ -19,7 +19,7 @@ def build_segformer3d_model(config: Optional[Dict] = None) -> nn.Module:
 
     return SegFormer3D(
         in_channels=params["in_channels"],      # modalities 수
-        sr_ratios=params["sr_ratios"],          # 
+        sr_ratios=params["sr_ratios"],          
         embed_dims=params["embed_dims"],
         patch_kernel_size=params["patch_kernel_size"],
         patch_stride=params["patch_stride"],

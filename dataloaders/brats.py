@@ -28,8 +28,14 @@ class BratsDataset(Dataset):
         #   - 기존: validation.csv 사용 → 실제 전처리 코드에서는 val.csv로 저장됨
         #   - split 인자를 통해 train/val/test 명시 가능하도록 개선
         # ------------------------------------------------------------
-        if split is not None:
-            csv_name = f"{split}.csv"
+        if split == "test":
+            csv_name = "test.csv"
+            
+        elif fold_id is not None:
+            if is_train:
+                csv_name = f"train_fold_{fold_id}.csv"
+            else:
+                csv_name = f"val_fold_{fold_id}.csv"
         else:
             csv_name = "train.csv" if is_train else "val.csv"
 

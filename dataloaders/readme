@@ -1,0 +1,82 @@
+# dataloader
+build_dataset.py
+- 데이터셋 타입을 설정하면 그에 맞는 dataloader를 불러오도록 구현
+- 사용 예시
+config.yaml 코드 중 데이터로터 부분:
+# dataset args
+dataset_parameters:
+  dataset_type: "brats_seg" <-- 이 부분에 해당
+
+brats.py
+- Segformer3d github 구조에 맞는 형식의 BraTS 데이터를 불러오는 코드
+
+brats_h5.py
+- .h5 으로 전처리된 데이터셋을 불러오는 코드
+
+# .h5 파일 전처리 코드 참고
+def _normalize_volume_np(vol):
+    """퍼센타일 클리핑 + Z-score 정규화 (비영점 마스크 기준, 배경은 0 유지)"""
+    nz = vol > 0
+    if nz.sum() == 0:
+        return vol.astype(np.float32)
+
+    v = vol[nz]
+    lo, hi = np.percentile(v, [0.5, 99.5])
+    v_clipped = np.clip(v, lo, hi)
+    m = v_clipped.mean()
+    s = v_clipped.std()
+    if s < 1e-8:
+        s = 1e-8
+
+    out = np.zeros_like(vol, dtype=np.float32)
+    out[nz] = ((v_clipped - m) / s).astype(np.float32)
+    return out
+
+
+        # NIfTI 파일 로드
+        t1ce = nib.load(os.path.join(patient_dir, t1ce_file)).get_fdata()
+        flair = nib.load(os.path.join(patient_dir, flair_file)).get_fdata()
+        seg = nib.load(os.path.join(patient_dir, seg_file)).get_fdata()
+
+        # 정규화
+        t1ce = _normalize_volume_np(t1ce)
+        flair = _normalize_volume_np(flair)
+
+        # H5 파일은 항상 4개 모달리티로 저장 (T1, T1CE, T2, FLAIR)
+        # 실험 시 필요한 모달리티만 선택적으로 로드 가능
+        t1 = nib.load(os.path.join(patient_dir, t1_file)).get_fdata()
+        t2 = nib.load(os.path.join(patient_dir, t2_file)).get_fdata()
+        t1 = _normalize_volume_np(t1)
+        t2 = _normalize_volume_np(t2)
+        image = np.stack([t1, t1ce, t2, flair], axis=-1)  # (H, W, D, 4)
+        
+        # (H, W, D, C) -> (C, H, W, D)로 변환
+        image = np.transpose(image, (3, 0, 1, 2)).astype(np.float32)
+        
+        # Mask 처리
+        mask = seg.astype(np.int64)
+        mask = np.where(mask == 4, 3, mask)
+
+
+        # 포그라운드 좌표 사전 계산 (패치 샘플링 최적화)
+        # 클래스별 포그라운드 좌표를 미리 계산하여 저장
+        fg_coords_dict = {}
+        for cls in [1, 2, 3]:
+            coords = np.argwhere(mask == cls)
+            if len(coords) > 0:
+                fg_coords_dict[f'fg_coords_{cls}'] = coords
+        
+        # HDF5로 저장 (메타데이터 포함, gzip level 4 - 벤치마크 결과 최적값)
+        # 벤치마크 결과: level 4가 Cold cache 로딩(270ms)에서 가장 빠름, 파일 크기(6.89MB)도 최소
+        with h5py.File(output_path, 'w') as f:
+            f.create_dataset('image', data=image, compression='gzip', compression_opts=4)
+            f.create_dataset('mask', data=mask, compression='gzip', compression_opts=4)
+            # 포그라운드 좌표 저장 (패치 샘플링 최적화)
+            for cls_key, coords in fg_coords_dict.items():
+                f.create_dataset(cls_key, data=coords, compression='gzip', compression_opts=1)
+            # 메타데이터 저장 (모달리티 구성 확인용)
+            # H5 파일은 항상 4개 모달리티로 저장되므로 use_4modalities는 항상 True
+            f.attrs['use_4modalities'] = True
+            f.attrs['num_channels'] = image.shape[0]  # 항상 4
+            f.attrs['has_fg_coords'] = len(fg_coords_dict) > 0
+

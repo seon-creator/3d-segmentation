@@ -1,0 +1,26 @@
+Grad-CAM
+====== Faithfulness Curve Calculation ======
+[DEBUG] k=0.01 | Comp=0.2751, Suff=0.5115, DFR=True | P_orig=0.7682, P_masked=0.4931
+[DEBUG] k=0.02 | Comp=0.7555, Suff=0.2494, DFR=True | P_orig=0.7682, P_masked=0.0127
+[DEBUG] k=0.03 | Comp=0.7682, Suff=0.0967, DFR=True | P_orig=0.7682, P_masked=0.0000
+[DEBUG] k=0.04 | Comp=0.7682, Suff=0.0180, DFR=True | P_orig=0.7682, P_masked=0.0000
+[DEBUG] k=0.05 | Comp=0.7682, Suff=0.1043, DFR=True | P_orig=0.7682, P_masked=0.0000
+==============================================
+
+IG
+====== Computing Faithfulness Curves ======
+[DEBUG] k=0.01 | Comp=0.3588, Suff=0.4711, DFR=True | P_orig=0.7682, P_masked=0.4094
+[DEBUG] k=0.02 | Comp=0.7535, Suff=0.2016, DFR=True | P_orig=0.7682, P_masked=0.0146
+[DEBUG] k=0.03 | Comp=0.7682, Suff=0.0652, DFR=True | P_orig=0.7682, P_masked=0.0000
+[DEBUG] k=0.04 | Comp=0.7682, Suff=0.0483, DFR=True | P_orig=0.7682, P_masked=0.0000
+[DEBUG] k=0.05 | Comp=0.7682, Suff=0.0668, DFR=True | P_orig=0.7682, P_masked=0.0000
+==========================================
+
+OCC
+====== Computing Faithfulness Curves (Occlusion-based) ======
+[DEBUG] k=0.01 | Comp=0.2658, Suff=0.5346, DFR=False | P_orig=0.7682, P_masked=0.5024
+[DEBUG] k=0.02 | Comp=0.4423, Suff=0.3138, DFR=True | P_orig=0.7682, P_masked=0.3259
+[DEBUG] k=0.03 | Comp=0.7172, Suff=0.2103, DFR=True | P_orig=0.7682, P_masked=0.0510
+[DEBUG] k=0.04 | Comp=0.7622, Suff=0.1676, DFR=True | P_orig=0.7682, P_masked=0.0059
+[DEBUG] k=0.05 | Comp=0.7675, Suff=0.1857, DFR=True | P_orig=0.7682, P_masked=0.0007
+=============================================================

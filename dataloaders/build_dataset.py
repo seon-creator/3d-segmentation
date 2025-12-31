@@ -22,6 +22,14 @@ def build_dataset(dataset_type: str, dataset_args: Dict):
             transform=build_augmentations(dataset_args["train"]),
             fold_id=dataset_args.get("fold_id", None),
         )
+
+    elif dataset_type == "brats_h5":
+        from .brats_h5 import BratsH5VolumeDataset
+        return BratsH5VolumeDataset(
+            root=dataset_args["root"],
+            split="train" if dataset_args.get("train", False) else "val",
+            return_fg_coords=dataset_args.get("return_fg_coords", False),
+        )
     else:
         raise ValueError(f"❌ Unsupported dataset type: {dataset_type}")
 

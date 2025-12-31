@@ -1,3 +1,4 @@
 Dataset,Test,model,loss,optimizer,WT,TC,ET,Mean_dice,Experiment
 brats2018_21_seg_v1,brats2018_21_seg_all_v1,segformer3d,dicev1,adamw,0.906,0.871,0.797,0.858,brats_2018_21_all_v1/ex2
 brats_seg,brats2018_21_seg_all_v1,segformer3d,dicev1,adamw,0.891,0.86,0.788,0.846,brats_2018_21_all_v1/ex2
+brats_seg,brats2018_21_seg_all_v1,segformer3d,dice,adamw,0.89,0.856,0.781,0.842,brats_2018_21_all_v1/ex2

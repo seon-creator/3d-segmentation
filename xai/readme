@@ -1,0 +1,48 @@
+# 모델 자료
+sample/ # 테스트 할 샘플 데이터, 라벨
+# [Experiment 1] Grad-CAM, IG, Occlusion 비교용
+- brats_label.pt
+- brats_modalities.pt
+
+# [Experiment 2] 데이터
+- modal2/   # T1ce + Flair 조합 테스트 데이터
+    - Brats18_CBICA_AAB_1_label.pt
+    - Brats18_CBICA_AAB_1_modalities.pt
+- modal4/   # Tic1 + Flair + T1 + T2 조합 테스트 데이터
+    - Brats18_CBICA_AAB_1_label.pt
+    - Brats18_CBICA_AAB_1_modalities.pt
+
+
+# XAI class 정의
+method/ 
+- gradcam_3d.py
+- integrated_gradients_3d.py
+- occlusion_3d.py
+
+slices/ # 샘플 별 라벨 존재하는 슬라이스 번호 찾는 목적으로 생성
+- axial_grid_000.png
+- coronal_grid_000.png
+- sagittal_grid_000.png
+
+
+# 시각화 코드
+vis_label.py : 3d segmentation 라벨 모두 한 번에 시각화
+vis.py : 2x2 시각화 코드 (Origin, Label, Label+pred, XAI-heatmap)
+
+
+# XAI 실행 코드
+- gradcam3d.py  # 2개 모달리티만 사용한 경우 평가
+- gradcam3d_v1.py   # 4개 모달리티 사용한 경우 평가
+- integrated_gradients3d.py
+- occlusion_3d.py
+
+
+# XAI 평가 코드
+- gradcam_eval.py
+- integrated_gradients3d_eval.py
+- occlusion3d_eval.py
+
+
+# metric, Comp, Suff 계산 코드
+- faithfulness.py   # Comprehensiveness, Sufficiency
+- metrics.py # dice

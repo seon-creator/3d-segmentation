@@ -11,7 +11,6 @@
 losses/losses_v0.py
 
 /train_scripts/trainer_ddp_old.py
-/xai
 
 LICENSE
 **/wandb

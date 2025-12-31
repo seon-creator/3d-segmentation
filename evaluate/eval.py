@@ -8,6 +8,7 @@ import csv  # CSV 저장용
 
 from architectures.build_architecture import build_architecture
 from dataloaders.build_dataset import build_dataset, build_dataloader
+from post_processing import suppress_small_et
 
 # 실험 폴더명 지정
 EXPERIMENT = "brats_2018_21_all_v1/ex2"
@@ -120,6 +121,14 @@ with torch.no_grad():
 
         # multi-class argmax로 클래스 맵 생성
         preds_class = torch.argmax(outputs, dim=1)  # (B, H, W, D)
+
+        # -------------------------------
+        # ET post-processing
+        # -------------------------------
+        preds_class = suppress_small_et(
+            preds_class,
+            threshold=500
+        )
 
         # GT 라벨도 (B, H, W, D) 형태의 클래스 맵으로 맞추기
         if labels.ndim == 5 and labels.shape[1] == 1:
