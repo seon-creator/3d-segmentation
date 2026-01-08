@@ -1,5 +1,9 @@
 
-**/data
+**/data/*/
+**/data2024/BraTS2024_PED/
+**/data2024/BraTS2024_PED_cropped/
+**/data2024/BraTS2024_PED_split/
+**/data_old
 
 **experiments/
 

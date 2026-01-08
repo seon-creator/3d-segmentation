@@ -1,6 +1,7 @@
 # 파일 설명
-trainer_ddp_old.py : 기존 Segformer3d에 내장되어있던 코드 (WT, TC, ET 매핑 라벨을 학습하는 코드)
-trainer_ddp.py : WT, TC, ET 매핑에서 0, 1, 2, 3 개별 라벨을 학습하는 코드
+trainer_ddp.py : 기존 Segformer3d에 내장되어있던 코드 (WT, TC, ET 매핑 라벨을 학습하는 코드)
+trainer_ddp_v1.py : BraTS2018-21 버전의 데이터셋에서 0, 1, 2, 3 개별 라벨을 학습하는 방식 코드
+trainer_ddp_h5.py : BraTS2024 버전의 데이터셋을 가지고 학습하는 코드 0,1,2,3,4 개별라벨 학습방식
 utils.py
 
 

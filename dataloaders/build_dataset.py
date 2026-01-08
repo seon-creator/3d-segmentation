@@ -23,11 +23,11 @@ def build_dataset(dataset_type: str, dataset_args: Dict):
             fold_id=dataset_args.get("fold_id", None),
         )
 
-    elif dataset_type == "brats_h5":
-        from .brats_h5 import BratsH5VolumeDataset
-        return BratsH5VolumeDataset(
-            root=dataset_args["root"],
-            split="train" if dataset_args.get("train", False) else "val",
+    elif dataset_type == "brats2024-ped":
+        from .brats2024 import Brats2024Dataset
+        return Brats2024Dataset(
+            split_root=dataset_args["split_root"],
+            split=dataset_args.get("split", "train"),
             return_fg_coords=dataset_args.get("return_fg_coords", False),
         )
     else:

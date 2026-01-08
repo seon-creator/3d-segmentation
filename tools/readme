@@ -1,0 +1,4 @@
+# Params, FLOPS 계산해주는 코드
+segformer3d_summary.py          # architectures/segformer3d.py 또는 architectures/models/segformer3d.py
+segformer3d_unet_summary.py     # architectures/models/segformer3d_unet.py 전용
+unet_summary.py                 # architectures/models/unet3d.py 전용

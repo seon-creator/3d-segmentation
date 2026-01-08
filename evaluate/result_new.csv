@@ -1,0 +1,2 @@
+Dataset,Test,model,loss,optimizer,WT,TC,ET,Mean_dice,Experiment
+brats_seg,Brats2018,segformer3d,dice,adamw,0.87,0.784,0.74,0.798,brats_2018/segformer3d_mlp/base

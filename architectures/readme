@@ -1,28 +1,131 @@
-Segformer3d.py 구성
-- encoder : encoders/segformer3d_encoder.py
-    - import 코드(encoders 폴더 하위) : attention.py, mlp.py, patch_embedding.py, transformer_blocks.py
-- decoder : decoders/segformer3d_decoder.py
-    - import 코드(decoders 폴더 하위) : mlp.py
-- models : segformer3d.py
-# 폴더 구조
-├── architectures
-│   ├── __init__.py
-│   ├── build_architecture.py   # 모델을 빌드 코드
-│   ├── decoders
-│   │   ├── __init__.py
-│   │   ├── mlp.py
-│   │   ├── segformer3d_decoder.py  # mlp decoder (segformer baseline)
-│   │   └── unet_decoder_3d.py      # Unet decoder
-│   ├── encoders
-│   │   ├── __init__.py
-│   │   └── attemtion.py
-│   │   └── mlp.py
-│   │   └── patch_embedding.py
-│   │   └── segformer3d_encoder.py  # Segformer encoder
-│   │   └── transformer_blocks.py
-│   ├── models
-│   │   └── segformer3d_unet.py # Segformer decoder(unet)
-│   │   └── segformer3d.py  # Segformer model (baseline)
-│   ├── readme
-│   ├── build_architecture.py   # 모델 빌드 코드
+# Overview
 
+Input Volume (B, C, D, H, W)
+        │
+        ▼
+MixVisionTransformer (Encoder)
+  ├─ Stage 1 → C1
+  ├─ Stage 2 → C2
+  ├─ Stage 3 → C3
+  └─ Stage 4 → C4
+        │
+        ▼
+SegFormerDecoderHead (Decoder)
+        │
+        ▼
+Output Segmentation Map (B, num_classes, D, H, W)
+
+
+# SegFormer3D
+
+역할
+	•	SegFormer3D 전체 모델을 구성하는 메인 클래스
+	•	Encoder(MixVisionTransformer) + Decoder(SegFormerDecoderHead)를 결합
+
+주요 구성
+	•	segformer_encoder: Multi-stage Transformer encoder
+	•	segformer_decoder: All-MLP 기반 decoder
+	•	_init_weights: Linear / Conv / Norm layer 초기화
+
+Forward 흐름
+	1.	입력 볼륨 → Encoder
+	2.	Encoder 출력 C1, C2, C3, C4 추출
+	3.	Decoder로 multi-scale feature fusion
+	4.	최종 segmentation map 출력
+
+##################################################################
+## Encoder 구성 요소
+
+### MixVisionTransformer
+역할
+	•	SegFormer의 핵심 Encoder
+	•	Pyramid 구조로 다중 해상도 feature를 생성
+
+출력
+	•	4단계 feature map 리스트: [C1, C2, C3, C4]
+	•	각 feature는 (B, C, D, H, W) 형태
+
+구성 요소
+	•	PatchEmbedding × 4
+	•	TransformerBlock × depth(stage별)
+	•	LayerNorm (stage별)
+
+### PatchEmbedding
+역할
+	•	입력 3D 볼륨을 patch 단위로 분할 후 embedding
+	•	Conv3D 기반 patch embedding
+
+입력 / 출력
+	•	Input: (B, C, D, H, W)
+	•	Output: (B, N, embed_dim)
+(N = D × H × W / stride³)
+
+구성
+	•	Conv3d
+	•	LayerNorm
+
+### TransformerBlock
+역할
+	•	Standard Transformer block (Pre-LN)
+	•	Self-Attention + MLP 구조
+
+구성
+	•	SelfAttention
+	•	_MLP
+	•	Residual connection
+
+#### SelfAttention
+역할
+	•	SegFormer의 핵심 설계인 Spatial Reduction Attention
+	•	Token 수를 줄여 연산량 감소
+
+특징
+	•	sr_ratio > 1일 경우:
+	•	Conv3D 기반 downsampling 후 K, V 생성
+	•	PyTorch 2.0 이상에서는
+	•	scaled_dot_product_attention 사용
+
+#### _MLP
+역할
+	•	Transformer block 내부 Feed-Forward Network
+	•	공간 정보를 유지하기 위해 Depthwise Conv3D 포함
+
+구성
+	•	Linear → DWConv → GELU → Linear
+
+#### DWConv
+역할
+	•	Token sequence를 다시 3D 형태로 복원 후
+	•	Depthwise 3D convolution 적용
+	•	Local spatial information 보강
+
+#### cube_root (utility function)
+역할
+	•	patch 개수 N으로부터 (D, H, W) 복원
+	•	SegFormer3D는 정육면체 patch 구조를 가정
+
+##################################################################
+## Decoder 구성 요소
+
+### SegFormerDecoderHead
+역할
+	•	SegFormer의 All-MLP Decoder
+	•	Multi-scale feature를 동일 해상도로 맞춘 뒤 융합
+
+입력
+	•	Encoder 출력: (C1, C2, C3, C4)
+
+출력
+	•	Segmentation map (B, num_classes, D, H, W)
+
+구성
+	1.	각 stage별 feature → MLP_ projection
+	2.	모든 feature를 C1 해상도로 upsampling
+	3.	Concatenation 후 1×1×1 Conv로 fusion
+	4.	최종 prediction
+	5.	Trilinear upsampling (×4)
+
+#### MLP_
+역할
+	•	Decoder에서 feature channel을 통일하기 위한 projection
+	•	Flatten → Linear → LayerNorm

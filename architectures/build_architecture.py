@@ -13,6 +13,11 @@ def build_architecture(config):
         model = build_segformer3d_model(config)
         return model
 
+    elif model_name == "segformer3d_old":
+        from architectures.segformer3d import build_segformer3d_model
+        model = build_segformer3d_model(config)
+        return model
+
     # SegFormer3D + UNet decoder
     elif config["model_name"] == "segformer3d_unet":
         from architectures.models.segformer3d_unet import build_segformer3d_unet_model

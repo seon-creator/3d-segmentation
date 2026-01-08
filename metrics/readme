@@ -1,9 +1,9 @@
-segmentation_metrics_old.py: 
+segmentation_metrics.py: 
 - 기존 Segformer3d에 내장되어있던 코드 (WT, TC, ET 매핑 라벨을 학습하는 코드)
 
 segmentation_metrics_v0.py: 
 - WT, TC, ET 매핑에서 0, 1, 2, 3 개별 라벨을 평가하도록 하는 코드 -> dice score 바로 계산
 
-segmentation_metrics.py
+segmentation_metrics_v1.py
 - 클래스 재사용성을 높이기 위해 segmentation_metrics_v0에서 클래스 내장 함수를 분리한 구조
 - 0,1,2,3 개별라벨에 대한 평가 + WT, TC, ET 클래스 일때의 평가 모두 포함

@@ -10,6 +10,7 @@ import monai
 from metrics.segmentation_metrics import SlidingWindowInference
 import kornia
 
+
 #################################################################################################
 class Segmentation_Trainer:
     def __init__(
@@ -62,8 +63,6 @@ class Segmentation_Trainer:
         self.best_val_loss = 100.0  # best validation loss
         self.epoch_val_dice = 0.0  # epoch validation accuracy
         self.best_val_dice = 0.0  # best validation accuracy
-        self.epoch_val_brats_dice = 0.0 # WT, TC, ET 버전
-        self.best_val_brats_dice = 0.0  # WT, TC, ET
 
         # external metric functions we can add
         self.sliding_window_inference = SlidingWindowInference(
@@ -177,8 +176,7 @@ class Segmentation_Trainer:
         """
         # Initialize the training loss for the current Epoch
         epoch_avg_loss = 0.0
-        total_4class_dice = 0.0     # 0,1,2,3 
-        total_brats_dice = 0.0  # WT, TC, ET
+        total_dice = 0.0
 
         # set model to train mode
         self.model.eval()
@@ -194,39 +192,56 @@ class Segmentation_Trainer:
                     raw_data["image"],
                     raw_data["label"],
                 )
-                # 🔹 1. model 선택
-                model = self.ema_model if use_ema else self.model
+                # forward pass
+                if use_ema:
+                    predicted = self.ema_model.forward(data)
+                else:
+                    predicted = self.model.forward(data)
 
-                # 🔹 2. sliding window inference (딱 한 번)
-                logits = self.sliding_window_inference.infer(data, model)
+                # calculate loss
+                loss = self.criterion(predicted, labels)
 
-                # 🔹 3. loss
-                loss = self.criterion(logits, labels)
+                # calculate metrics
+                if self.calculate_metrics:
+                    mean_dice = self._calc_dice_metric(data, labels, use_ema)
+                    # keep track of number of total correct
+                    total_dice += mean_dice
+
+                # update loss for the current batch
                 epoch_avg_loss += loss.item()
 
-                if self.calculate_metrics:
-                    # 🔹 4. 4-class dice
-                    dice_4c = self.sliding_window_inference.dice_4class(
-                        logits, labels
-                    )
-
-                    # 🔹 5. BraTS dice (WT, TC, ET mean)
-                    dice_brats = self.sliding_window_inference.dice_brats(
-                        logits, labels
-                    )
-
-                    total_4class_dice += dice_4c
-                    total_brats_dice += dice_brats
-
-        num_batches = index + 1
-
         if use_ema:
-            self.epoch_val_ema_dice = total_4class_dice / num_batches
+            self.epoch_val_ema_dice = total_dice / float(index + 1)
         else:
-            self.epoch_val_dice = total_4class_dice / num_batches
-            self.epoch_val_brats_dice = total_brats_dice / num_batches
+            self.epoch_val_dice = total_dice / float(index + 1)
 
-        return epoch_avg_loss / num_batches
+        epoch_avg_loss = epoch_avg_loss / float(index + 1)
+
+        return epoch_avg_loss
+
+    def _calc_dice_metric(self, data, labels, use_ema: bool) -> float:
+        """_summary_
+
+        Args:
+            predicted (_type_): _description_
+            labels (_type_): _description_
+
+        Returns:
+            float: _description_
+        """
+        if use_ema:
+            avg_dice_score = self.sliding_window_inference(
+                data,
+                labels,
+                self.ema_model,
+            )
+        else:
+            avg_dice_score = self.sliding_window_inference(
+                data,
+                labels,
+                self.model,
+            )
+        return avg_dice_score
 
     def _run_train_val(self) -> None:
         """_summary_"""
@@ -303,9 +318,6 @@ class Segmentation_Trainer:
         if self.calculate_metrics:
             if self.epoch_val_dice >= self.best_val_dice:
                 self.best_val_dice = self.epoch_val_dice
-            
-            if self.epoch_val_brats_dice >= self.best_val_brats_dice:
-                self.best_val_brats_dice = self.epoch_val_brats_dice
 
     def _log_metrics(self) -> None:
         """_summary_"""
@@ -340,8 +352,7 @@ class Segmentation_Trainer:
                 info_txt_path = os.path.join(save_path, "best_val_dice_info.txt")
                 os.makedirs(save_path, exist_ok=True)
                 with open(info_txt_path, "w") as f:
-                    f.write(f"best_val_dice_4class: {self.best_val_dice:.6f}\n")
-                    f.write(f"best_val_dice_brats: {self.best_val_brats_dice:.6f}\n")
+                    f.write(f"best_val_dice: {self.best_val_dice:.6f}\n")
                     f.write(f"epoch: {self.current_epoch}\n")
                     f.write(f"val_loss: {self.epoch_val_loss:.6f}\n")
                     f.write(f"train_loss: {self.epoch_train_loss:.6f}\n")

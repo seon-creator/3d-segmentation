@@ -1,0 +1,78 @@
+#### BraTS 2024 버전 데이터 라벨 정보
+라벨 값  의미 (BraTS 2024)
+설명
+0 : Background
+1 : NET / NCR  Non-Enhancing Tumor Core (비조영 종양 핵, 괴사 포함)
+2 : SNFH (≈ ED) Surrounding Non-Enhancing T2/FLAIR Hyperintensity→ 기존 ED(부종)에 해당
+3 : ET Enhancing Tumor (조영증강 종양)
+4 : RC Resection Cavity (수술로 제거된 공동)
+
+
+#### 데이터 사용 시 아래 내용 참고
+=> 단일클래스 0,1,2,3 방식으로 라벨링된 데이터로 학습할 경우 다음 폴더 사용
+# 2018+2021
+brats2018_21_seg_all_v1 (train: 1072, val: 231, test: 233)
+# 2018
+brats2018_seg_all_v1 (train: 197, val: 44, test: 44)
+# 2021
+brats2021_seg_all_v1 (train: 875, val: 187, test: 189)
+
+
+# 데이터만 바로 사용하려면 csv파일만 복사해 가도 사용가능, 경로가 절대경로로 저장되어있음.
+폴더 구조
+brats2018_21_seg_all_v1/    # 이건 2018+2021 데이터 경로를 병합해둔거라 따로 데이터 폴더는 들어있지 않음
+- train.csv
+- val.csv
+- test.csv
+
+brats2018_seg_all_v1/
+- BraTS2018_training_data/  <--  여기에 .pt로 데이터 들어있음
+    - Brats18_2013_0_1/ 
+        - Brats18_2013_0_1_modalities.pt
+        - Brats18_2013_0_1_label.pt
+    ...
+- train.csv    # train으로 사용할 데이터의 경로 들어있음
+- val.csv      # validation으로 사용할 데이터의 경로 들어있음
+- test.csv     # test으로 사용할 데이터의 경로 들어있음
+
+brats2021_seg_all_v1/
+- BraTS2021_training_data/
+    - BraTS2021_00000/ 
+        - BraTS2021_00000_modalities.pt
+        - BraTS2021_00000_label.pt
+    ...
+- train.csv    # train으로 사용할 데이터의 경로 들어있음
+- val.csv      # validation으로 사용할 데이터의 경로 들어있음
+- test.csv     # test으로 사용할 데이터의 경로 들어있음
+
+
+# 데이터 구성
+다음 전처리를 통해 .pt 파일로 통합해 저장 관리하는 방식으로 구현
+	•	HGG / LGG 환자군을 stratified split으로 train/val/test 분할
+	•	서로 다른 modality의 강도 범위 정규화
+	•	BraTS label 체계를 단일 채널(class 0-3) 로 통합
+	•	Orientation 통일 및 고정 크기(12x128x128)로 crop
+	•	PyTorch 학습에 바로 사용 가능한 .pt 파일로 저장
+
+
+# 폴더명 규칙
+1. _v1 : 클래스 0,1,2,4 -> 0,1,2,3 단일 클래스 학습 모델
+- _v1이 붙지 않은 폴더 : WT(1,2,3), TC(1,3), ET(3) 으로 사전에 매핑된 클래스 학습 모델
+
+2. _all : BraTS의 모든 모달리티(Flair, T1ce, T1, T2)를 사용한 학습 모델
+- _all이 붙지 않은 폴더 : BraTS의 2개 모달리티(Flair, T1ce)만 사용한 학습 모델
+
+3. 2018_21 : 2018 + 2021 버전을 합친 학습 모델
+
+ex. brats_2018_21_all_v1 폴더 해석
+: 2018 + 2021 버전, 모든 모달리티, 0,1,2,3 단일 클래스 학습 모델
+
+# brats2018_seg_preprocess
+T1ce, Flair 두 개의 모달리티만을 사용한 brats 2018 데이터셋
+train, val, test는 0.7 : 0.15 : 0.15 비율로 split함
+
+라벨 매핑정보
+WT = (img == 1) | (img == 2) | (img == 3)
+TC = (img == 1) | (img == 3)
+ET = (img == 3)
+random_seed=42
